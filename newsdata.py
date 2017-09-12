@@ -17,13 +17,6 @@ def most_popular_posts():
     """Return the three most popular articles of all time"""
     db, c = db_connect()
 
-    query = "select title, count(*) as views "
-    "from articles, log "
-    "where log.path = concat('/article/', articles.slug) "
-    "group by title "
-    "order by views desc "
-    "limit 3;"
-
     c.execute("select title, count(*) as views "
               "from articles, log "
               "where log.path = concat('/article/', articles.slug) "
