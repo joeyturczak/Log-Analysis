@@ -2,17 +2,35 @@
 
 import psycopg2
 
-DBNAME = "news"
+
+def db_connect(database_name="news"):
+    """Connect to a database"""
+    try:
+        db = psycopg2.connect(database="{}".format(database_name))
+        cursor = db.cursor()
+        return db, cursor
+    except:
+        print("Error connecting to database")
 
 
 def most_popular_posts():
     """Return the three most popular articles of all time"""
-    db = psycopg2.connect(database=DBNAME)
-    c = db.cursor()
+    db, c = db_connect()
 
-    c.execute("select title, count(*) as views from articles, log where "
-              "log.path like '%' || articles.slug || '%' group by title "
-              "order by views desc limit 3;")
+    query = "select title, count(*) as views "
+    "from articles, log "
+    "where log.path = concat('/article/', articles.slug) "
+    "group by title "
+    "order by views desc "
+    "limit 3;"
+
+    c.execute("select title, count(*) as views "
+              "from articles, log "
+              "where log.path = concat('/article/', articles.slug) "
+              "group by title "
+              "order by views desc "
+              "limit 3;")
+
     return c.fetchall()
 
     db.close()
@@ -20,8 +38,7 @@ def most_popular_posts():
 
 def most_popular_authors():
     """Return the most popular authors of all time"""
-    db = psycopg2.connect(database=DBNAME)
-    c = db.cursor()
+    db, c = db_connect()
 
     c.execute("select name, count(*) as views from authors, articles, log "
               "where authors.id = articles.author and log.path like '%' || "
@@ -33,8 +50,7 @@ def most_popular_authors():
 
 def request_errors():
     """Return the days on which more than 1% of requests had errors"""
-    db = psycopg2.connect(database=DBNAME)
-    c = db.cursor()
+    db, c = db_connect()
 
     c.execute("select time, round((errors * 100.0) / total, 1) as error_perc "
               "from (select time::date as time, count(*) as total, count(case "
