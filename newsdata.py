@@ -40,9 +40,12 @@ def most_popular_authors():
     """Return the most popular authors of all time"""
     db, c = db_connect()
 
-    c.execute("select name, count(*) as views from authors, articles, log "
-              "where authors.id = articles.author and log.path like '%' || "
-              "articles.slug || '%' group by name order by views desc;")
+    c.execute("select name, count(*) as views "
+              "from authors, articles, log "
+              "where authors.id = articles.author "
+              "and log.path = concat('/article/', articles.slug) "
+              "group by name "
+              "order by views desc;")
     return c.fetchall()
 
     db.close()
